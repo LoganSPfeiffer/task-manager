@@ -4,6 +4,79 @@ Track React/Next.js concepts as you learn them. Claude Code updates this after e
 
 ## Concepts Covered
 
+### Module 2: Rendering Techniques
+
+**Conditional rendering — three patterns**
+
+1. `&&` short-circuit — render something or nothing:
+```js
+{done && <span>Done</span>}
+// If done is false, React renders nothing. If true, renders the span.
+```
+
+2. Ternary — render one thing or another:
+```js
+{done ? <DoneBadge /> : <ActiveDot />}
+```
+
+3. Early return — bail out of the whole component:
+```js
+if (tasks.length === 0) {
+  return <EmptyState />;
+}
+return <ul>...</ul>;
+```
+Use early return for "guard clauses" — when one condition changes everything about what renders.
+
+**`.map()` — rendering lists from arrays**
+`.map()` transforms an array of data into an array of JSX elements. React flattens that array into the DOM.
+```js
+tasks.map((task) => (
+  <li key={task.id}>
+    <TaskCard title={task.title} done={task.done} />
+  </li>
+))
+```
+Rule: the `key` goes on the outermost element returned by the callback — here that's `<li>`, not `<TaskCard>`.
+
+**Derived state — compute, don't duplicate**
+If a value can be calculated from existing state, don't put it in its own `useState`. Just compute it during render.
+```js
+// ❌ Don't do this:
+const [filteredTasks, setFilteredTasks] = useState([]);
+
+// ✅ Do this — recalculates automatically when activeFilter or tasks changes:
+const visibleTasks = tasks.filter(currentFilter.match);
+```
+This keeps state minimal and prevents values from getting out of sync.
+
+**Server vs Client Components — the boundary**
+The App Router renders everything on the server by default. When you add `'use client'`, you're saying "this component and everything it imports needs to run in the browser."
+
+Key rule: a Server Component can import and render a Client Component, but a Client Component **cannot** import a Server Component directly. The boundary only goes one direction.
+
+```
+page.js (Server) → TaskBoard (Client) → TaskList → TaskCard
+                                        ↑ these now run on the client too
+```
+
+In practice: push `'use client'` as far down the tree as possible. Only the parts that truly need interactivity should be Client Components.
+
+**`useState` preview (covered fully in Module 4)**
+`useState` takes an initial value and returns `[currentValue, setter]`. Calling the setter causes React to re-render the component with the new value.
+```js
+const [activeFilter, setActiveFilter] = useState('All');
+// activeFilter = 'All' initially
+// calling setActiveFilter('Done') → re-render with activeFilter = 'Done'
+```
+
+**Props with default values**
+Give props a default so the component works with or without them:
+```js
+export function TaskList({ tasks, emptyMessage = "No tasks yet." }) { ... }
+// Caller can omit emptyMessage — it falls back to the default
+```
+
 ### Module 1: Components & JSX
 
 **React Components are just functions**

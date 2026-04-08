@@ -15,13 +15,20 @@ export function TaskCard({ title, done }) {
       }`} />
 
       {/* Task title — strikethrough + dimmed when done */}
-      <span className={`text-sm font-medium transition-colors duration-200 ${
+      <span className={`flex-1 text-sm font-medium transition-colors duration-200 ${
         done
           ? "line-through text-slate-500"
           : "text-slate-200 group-hover:text-white"
       }`}>
         {title}
       </span>
+
+      {/* Status badge — conditional rendering: only shown when done */}
+      {done && (
+        <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
+          Done
+        </span>
+      )}
 
     </div>
   );

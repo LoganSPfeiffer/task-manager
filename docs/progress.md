@@ -3,7 +3,7 @@
 ## Modules
 - [x] **Setup** — Scaffold, clean boilerplate, dev server running
 - [x] **Module 1: Components & JSX** — Functions, JSX syntax, Tailwind, Server Components
-- [ ] **Module 2: Rendering Techniques** — Conditional rendering, .map(), keys, Server vs Client
+- [x] **Module 2: Rendering Techniques** — Conditional rendering, .map(), keys, Server vs Client
 - [ ] **Module 3: Props & Data Flow** — One-way flow, callback props, 'use client'
 - [ ] **Module 4: State & Rendering** — useState, immutable updates, re-render cycle
 - [ ] **Module 5: State Structure & Forms** — Derived state, controlled inputs, form handling
@@ -11,6 +11,14 @@
 - [ ] **Module 7: Lifting State** — Shared state, sibling communication, server-client boundary
 
 ## Session Notes
+
+### Module 2 — 2026-04-08
+- Created `TaskBoard` as first Client Component — `'use client'` + `useState` for active filter
+- Filter buttons (All/Active/Done) with live count badges — derived state, no extra useState
+- Conditional rendering: `done && <Badge />` pattern, filter-specific empty state messages
+- `TaskList` updated to accept `emptyMessage` prop — same component, different behavior via props
+- `TaskCard` updated with status badge (conditional `{done && ...}` JSX)
+- Full app architecture planned and committed to `docs/architecture.md`
 
 ### Module 1 — 2026-04-08
 - Created `TaskCard` and `TaskList` as Server Components (no `'use client'` needed — no interactivity yet)
