@@ -4,6 +4,80 @@ Track React/Next.js concepts as you learn them. Claude Code updates this after e
 
 ## Concepts Covered
 
+### Module 3: Props & Data Flow
+
+**Callback props — events flow up, data flows down**
+React has one-way data flow: data goes parent → child via props. But what about user actions that need to change parent state? The parent passes a *function* as a prop. The child calls it. The state update happens where the state lives.
+
+```
+TaskBoard (owns state, defines handlers)
+  └── TaskList (receives and threads callbacks)
+        └── TaskCard (calls the callbacks on user action)
+```
+
+This is the core React mental model: **state flows down as data, events bubble up as function calls.**
+
+**Defining callbacks in the state owner**
+The handler always lives in the same component as the state it updates — because only that component can call its own setter:
+```js
+// In TaskBoard — only TaskBoard can call setTasks
+function handleToggle(id) {
+  console.log('toggle', id);
+  setTasks(tasks.map((task) =>
+    task.id === id ? { ...task, done: !task.done } : task
+  ));
+}
+```
+
+**Binding ids at the list level**
+TaskCard shouldn't need to know about task ids — it just calls `onToggle()`. The id gets bound one level up, in TaskList's `.map()`:
+```js
+// In TaskList — close over task.id in the callback
+<TaskCard
+  onToggle={() => onToggle(task.id)}
+  onDelete={() => onDelete(task.id)}
+/>
+// TaskCard calls onToggle() with no arguments — TaskList already baked in the id
+```
+This keeps TaskCard clean and reusable. It doesn't care what id means.
+
+**Immutable state updates**
+Never mutate state directly — always return a new array or object.
+
+Toggle (update one item):
+```js
+// ❌ Mutates — React won't detect the change, no re-render
+tasks[index].done = true;
+
+// ✅ Returns a new array with the one item replaced
+setTasks(tasks.map((task) =>
+  task.id === id ? { ...task, done: !task.done } : task
+));
+// { ...task } spreads all existing fields, then done: !task.done overrides just that one
+```
+
+Delete (remove one item):
+```js
+// ✅ Returns a new array without the deleted task
+setTasks(tasks.filter((task) => task.id !== id));
+```
+
+**`group-hover` for hover-reveal UI**
+The delete button is hidden by default (`opacity-0`) and fades in when the card is hovered (`group-hover:opacity-100`). Using opacity instead of `display:none` keeps the layout stable — no elements jumping around on hover:
+```js
+<div className="group ...">           {/* parent gets group */}
+  <button className="opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+    ×
+  </button>
+</div>
+```
+
+**`aria-label` on icon buttons**
+Buttons with no visible text need an `aria-label` for screen readers and accessibility tools:
+```js
+<button aria-label="Delete task"> <svg>...</svg> </button>
+```
+
 ### Module 2: Rendering Techniques
 
 **Conditional rendering — three patterns**

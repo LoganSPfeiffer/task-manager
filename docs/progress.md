@@ -4,13 +4,21 @@
 - [x] **Setup** — Scaffold, clean boilerplate, dev server running
 - [x] **Module 1: Components & JSX** — Functions, JSX syntax, Tailwind, Server Components
 - [x] **Module 2: Rendering Techniques** — Conditional rendering, .map(), keys, Server vs Client
-- [ ] **Module 3: Props & Data Flow** — One-way flow, callback props, 'use client'
+- [x] **Module 3: Props & Data Flow** — One-way flow, callback props, 'use client'
 - [ ] **Module 4: State & Rendering** — useState, immutable updates, re-render cycle
 - [ ] **Module 5: State Structure & Forms** — Derived state, controlled inputs, form handling
 - [ ] **Module 6: Effects** — useEffect, dependency array, cleanup, SSR window guard
 - [ ] **Module 7: Lifting State** — Shared state, sibling communication, server-client boundary
 
 ## Session Notes
+
+### Module 3 — 2026-04-08
+- Tasks array moved into `TaskBoard` (owns its own state now, page.js knows nothing about tasks)
+- `handleToggle` and `handleDelete` defined in TaskBoard, passed down as callback props
+- `TaskList` threads `onToggle`/`onDelete` through — binds task id so `TaskCard` gets simple `() => void` callbacks
+- `TaskCard` grows toggle button (with animated checkmark SVG) and hover-reveal delete button
+- Immutable update patterns: `map` to toggle, `filter` to delete — never mutate state directly
+- page.js is now a pure Server Component layout wrapper — no data, no interactivity
 
 ### Module 2 — 2026-04-08
 - Created `TaskBoard` as first Client Component — `'use client'` + `useState` for active filter
