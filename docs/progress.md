@@ -1,7 +1,7 @@
 # Progress Tracker
 
 ## Modules
-- [ ] **Setup** — Scaffold, clean boilerplate, dev server running
+- [x] **Setup** — Scaffold, clean boilerplate, dev server running
 - [ ] **Module 1: Components & JSX** — Functions, JSX syntax, Tailwind, Server Components
 - [ ] **Module 2: Rendering Techniques** — Conditional rendering, .map(), keys, Server vs Client
 - [ ] **Module 3: Props & Data Flow** — One-way flow, callback props, 'use client'
