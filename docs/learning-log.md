@@ -4,6 +4,94 @@ Track React/Next.js concepts as you learn them. Claude Code updates this after e
 
 ## Concepts Covered
 
+### Module 4: State, Rendering & Animations
+
+**Functional state updater — avoiding stale closures**
+When the new state depends on the previous value, always pass a function to the setter instead of using the current variable directly:
+```js
+// ❌ Can read stale state if updates are batched
+setTasks(tasks.map(...));
+
+// ✅ Always gets the freshest state
+setTasks((prev) => prev.map((t) => t.id === id ? { ...t, done: !t.done } : t));
+```
+React batches state updates in event handlers. The functional form guarantees you're working with the most recent value.
+
+**framer-motion basics — motion components**
+Swap any HTML element for its `motion.*` equivalent to get animation superpowers:
+```js
+// Plain div → animated div
+<motion.div
+  initial={{ opacity: 0, y: 16 }}   // starting state (before mount)
+  animate={{ opacity: 1, y: 0 }}    // target state (after mount)
+  exit={{ opacity: 0, scale: 0.95 }} // state when removed from DOM
+  transition={{ duration: 0.25 }}
+/>
+```
+`initial` only fires on first mount. `animate` re-runs whenever its values change. `exit` requires `AnimatePresence` as a parent.
+
+**AnimatePresence — animating unmounts**
+By default React removes elements from the DOM immediately. `AnimatePresence` intercepts the removal, plays the `exit` animation, then removes the element:
+```js
+<AnimatePresence mode="popLayout">
+  {items.map((item) => (
+    <motion.li key={item.id} exit={{ opacity: 0 }}>...</motion.li>
+  ))}
+</AnimatePresence>
+```
+`mode="popLayout"` removes the exiting item from layout immediately so remaining items can slide into place without waiting for the exit to finish. `key` is mandatory — it's how AnimatePresence knows which elements entered and left.
+
+**`layout` prop — animating reflow**
+Adding `layout` to a motion element causes it to animate any position or size changes caused by sibling elements being added/removed:
+```js
+<motion.li key={task.id} layout exit={...}>
+  // When another li is removed, this one slides up smoothly
+```
+Without `layout`, elements just jump to their new position.
+
+**`layoutId` — shared element transitions**
+Give two different elements the same `layoutId` and framer-motion animates between them as if they're the same element morphing position:
+```js
+// In NavBar — active indicator slides between tab buttons
+{isActive && <motion.div layoutId="tab-indicator" className="underline" />}
+```
+When `active` changes, the underline doesn't disappear and reappear — it smoothly slides from the old tab to the new one.
+
+**`whileHover` / `whileTap` — gesture animations**
+Shorthand for common interaction states. Framer-motion handles the in/out automatically:
+```js
+<motion.button whileTap={{ scale: 0.94 }}>Click me</motion.button>
+<motion.div whileHover={{ y: -2 }}>Hover me</motion.div>
+```
+
+**`pathLength` — drawing SVG paths**
+Animate a stroke being drawn by animating `pathLength` from 0 to 1:
+```js
+<motion.path
+  d="M1.5 5l2.5 2.5 4.5-4.5"
+  initial={{ pathLength: 0 }}
+  animate={{ pathLength: 1 }}
+  transition={{ duration: 0.25 }}
+/>
+```
+The checkmark in the toggle button uses this — it feels like the check is being drawn by hand.
+
+**Deterministic color from a string**
+Hash a tag name to always pick the same color for the same tag, without storing color in data:
+```js
+function tagColor(tag) {
+  let h = 0;
+  for (const c of tag) h = (h * 31 + c.charCodeAt(0)) % PALETTE.length;
+  return PALETTE[h];
+}
+// "design" always → indigo, "docs" always → purple, etc.
+```
+
+**Mixing Tailwind + framer-motion**
+They target different CSS properties so they don't conflict:
+- Tailwind handles: colors, opacity, box-shadow (`hover:bg-... transition-colors`)
+- framer-motion handles: transforms, pathLength, custom spring physics (`whileHover`, `animate`)
+
 ### Module 3: Props & Data Flow
 
 **Callback props — events flow up, data flows down**

@@ -5,12 +5,21 @@
 - [x] **Module 1: Components & JSX** — Functions, JSX syntax, Tailwind, Server Components
 - [x] **Module 2: Rendering Techniques** — Conditional rendering, .map(), keys, Server vs Client
 - [x] **Module 3: Props & Data Flow** — One-way flow, callback props, 'use client'
-- [ ] **Module 4: State & Rendering** — useState, immutable updates, re-render cycle
+- [x] **Module 4: State & Rendering** — useState, immutable updates, re-render cycle
 - [ ] **Module 5: State Structure & Forms** — Derived state, controlled inputs, form handling
 - [ ] **Module 6: Effects** — useEffect, dependency array, cleanup, SSR window guard
 - [ ] **Module 7: Lifting State** — Shared state, sibling communication, server-client boundary
 
 ## Session Notes
+
+### Module 4 — 2026-04-08
+- Installed framer-motion; added animations throughout (fade-in, slide-up, exit, hover lift, pathLength checkmark)
+- Created `NavBar` with `layoutId="tab-indicator"` sliding underline between tabs
+- Created `StatsBar` with animated progress bar (spring easing on width)
+- `TaskCard` fully rewritten: priority colored left-border + dot, due date with overdue detection, tag pills with deterministic hash colors, animated checkmark SVG, hover-reveal delete
+- `TaskList` uses `AnimatePresence mode="popLayout"` + `motion.li layout` so deleted tasks collapse smoothly and siblings reflow
+- `TaskBoard` wraps in fade-in `motion.div`; filter buttons use `whileTap` for press feedback; `setTasks` uses functional updater form `(prev) => ...` to avoid stale closure bugs
+- `page.js` gains fixed radial gradient background accent, max-width increased to 3xl for breathing room
 
 ### Module 3 — 2026-04-08
 - Tasks array moved into `TaskBoard` (owns its own state now, page.js knows nothing about tasks)

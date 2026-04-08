@@ -1,51 +1,82 @@
 'use client'
 
 // TaskBoard — Client Component
-// Owns the tasks array and the active filter.
-// Defines toggle/delete handlers and passes them down as callback props.
-// page.js is a Server Component and knows nothing about tasks — all data lives here.
+// Owns the tasks array and filter state. Defines toggle/delete handlers.
+// Passes the full tasks list to StatsBar (always shows overall stats)
+// and the filtered list to TaskList (shows only what matches the active filter).
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { TaskList } from '@/components/TaskList';
+import { StatsBar } from '@/components/StatsBar';
 
 const INITIAL_TASKS = [
-  { id: 1, title: 'Read the React docs', done: true },
-  { id: 2, title: 'Build a task manager', done: false },
-  { id: 3, title: 'Learn Tailwind CSS', done: false },
-  { id: 4, title: 'Understand Server vs Client Components', done: true },
-  { id: 5, title: 'Add localStorage persistence', done: false },
+  {
+    id: 1,
+    title: 'Design the navigation bar layout',
+    done: true,
+    priority: 'medium',
+    dueDate: '2026-04-06',
+    tags: ['design', 'ui'],
+  },
+  {
+    id: 2,
+    title: 'Implement Framer Motion page transitions',
+    done: false,
+    priority: 'high',
+    dueDate: '2026-04-08',
+    tags: ['frontend', 'animations'],
+  },
+  {
+    id: 3,
+    title: 'Add localStorage sync for tasks',
+    done: false,
+    priority: 'high',
+    dueDate: '2026-04-07',   // yesterday — shows overdue styling
+    tags: ['storage', 'feature'],
+  },
+  {
+    id: 4,
+    title: 'Write module documentation and learning notes',
+    done: false,
+    priority: 'low',
+    dueDate: '2026-04-15',
+    tags: ['docs', 'learning'],
+  },
+  {
+    id: 5,
+    title: 'Set up App Router page structure',
+    done: false,
+    priority: 'medium',
+    dueDate: '2026-04-10',
+    tags: ['architecture', 'routing'],
+  },
 ];
 
 const FILTERS = [
   { label: 'All',    match: () => true },
-  { label: 'Active', match: (task) => !task.done },
-  { label: 'Done',   match: (task) => task.done },
+  { label: 'Active', match: (t) => !t.done },
+  { label: 'Done',   match: (t) => t.done },
 ];
 
 export function TaskBoard() {
-  // Two independent pieces of state — tasks data and which filter is active.
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [activeFilter, setActiveFilter] = useState('All');
 
-  // Immutable update: spread the old task object, override just the done field.
-  // Never do task.done = !task.done — mutating state directly breaks React's
-  // ability to detect changes and skips the re-render.
+  // Immutable toggle — spread old task, flip done
   function handleToggle(id) {
     console.log('toggle', id);
-    setTasks(tasks.map((task) =>
-      task.id === id ? { ...task, done: !task.done } : task
-    ));
+    setTasks((prev) => prev.map((t) => t.id === id ? { ...t, done: !t.done } : t));
   }
 
-  // Filter out the deleted task — returns a new array, never mutates the old one.
+  // Immutable delete — filter out the removed task
   function handleDelete(id) {
     console.log('delete', id);
-    setTasks(tasks.filter((task) => task.id !== id));
+    setTasks((prev) => prev.filter((t) => t.id !== id));
   }
 
-  // Derived values — computed fresh each render, no extra state needed.
   const currentFilter = FILTERS.find((f) => f.label === activeFilter);
-  const visibleTasks = tasks.filter(currentFilter.match);
+  const visibleTasks  = tasks.filter(currentFilter.match);
 
   const counts = {
     All:    tasks.length,
@@ -54,37 +85,45 @@ export function TaskBoard() {
   };
 
   return (
-    <div>
+    // Fade in on mount — wraps everything inside the TaskBoard section
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+    >
+
+      {/* Stats — always shows overall numbers, not filtered */}
+      <StatsBar tasks={tasks} />
 
       {/* Filter bar */}
       <div className="flex gap-2 mb-5">
         {FILTERS.map(({ label }) => {
           const isActive = activeFilter === label;
           return (
-            <button
+            <motion.button
               key={label}
               onClick={() => setActiveFilter(label)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 active:scale-95 ${
+              whileTap={{ scale: 0.94 }}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ${
                 isActive
-                  ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
-                  : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25'
+                  : 'bg-slate-700/60 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
               }`}
             >
               {label}
               {counts[label] > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-slate-600 text-slate-300'
+                <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none ${
+                  isActive ? 'bg-white/25 text-white' : 'bg-slate-600 text-slate-300'
                 }`}>
                   {counts[label]}
                 </span>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>
 
-      {/* Pass the handlers down as callback props.
-          TaskList doesn't know what they do — it just forwards them to TaskCard. */}
+      {/* Task list — filtered */}
       <TaskList
         tasks={visibleTasks}
         onToggle={handleToggle}
@@ -96,6 +135,6 @@ export function TaskBoard() {
         }
       />
 
-    </div>
+    </motion.div>
   );
 }
