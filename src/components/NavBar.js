@@ -1,13 +1,24 @@
+// ══════════════════════════════════════════════════════════════
+// COMPONENT: NavBar
+// PURPOSE:   Horizontal tab navigation bar at the top of the page.
+//            Highlights the active tab with an animated underline
+//            that slides smoothly between tabs using framer-motion's
+//            layoutId. Currently controls only visual state — in a
+//            future module each tab will link to its own route.
+// TYPE:      Client Component ('use client') — uses useState to
+//            track the active tab, and framer-motion's layoutId
+//            animation, both of which require the browser.
+// PROPS:     none — NavBar manages its own tab state locally.
+//            When routing is added, the active state will come from
+//            the URL rather than local useState.
+// ══════════════════════════════════════════════════════════════
 'use client'
-
-// NavBar — Client Component
-// Horizontal tab navigation with animated active indicator using framer-motion layoutId.
-// layoutId="tab-indicator" causes the underline to smoothly slide between tabs
-// rather than jumping — framer-motion tracks it across positions in the DOM.
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
+// Tab definitions live at module level — they never change, so there's
+// no reason to re-create this array on every render inside the component.
 const TABS = [
   {
     id: 'dashboard',
@@ -65,25 +76,32 @@ const TABS = [
 ];
 
 export function NavBar() {
+  // The active tab id is UI state — it changes when the user clicks a button
+  // and no other component needs to read it, so it belongs here locally.
+  // 'tasks' is the default because that's the only section built so far.
   const [active, setActive] = useState('tasks');
 
   return (
+    // sticky top-0 keeps the nav visible as the page scrolls.
+    // backdrop-blur-xl frosted-glass effect requires the element to have
+    // a semi-transparent background — bg-slate-800/90 provides that.
     <nav className="sticky top-0 z-50 bg-slate-800/90 backdrop-blur-xl border-b border-white/[0.06]">
       <div className="mx-auto max-w-5xl px-8">
         <div className="flex items-center gap-1 h-14">
 
-          {/* Logo / wordmark */}
+          {/* Brand mark */}
           <div className="flex items-center gap-2 mr-6">
             <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                 <path d="M2 4h12M2 8h8M2 12h5" />
               </svg>
             </div>
             <span className="text-sm font-semibold text-white tracking-tight">Focus</span>
           </div>
 
-          {/* Tabs */}
+          {/* Tab buttons */}
           {TABS.map((tab) => {
+            // isActive is derived from `active` state — no need to store it separately
             const isActive = active === tab.id;
             return (
               <button
@@ -95,11 +113,17 @@ export function NavBar() {
                     : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
                 }`}
               >
-                {/* Icon */}
+                {/* Icon gets the accent color when its tab is active */}
                 <span className={isActive ? 'text-indigo-400' : ''}>{tab.icon}</span>
                 {tab.label}
 
-                {/* Animated underline — layoutId makes it slide between tabs */}
+                {/* Animated underline — the key to the sliding effect.
+                    layoutId="tab-indicator" tells framer-motion these divs across
+                    different tab buttons are the SAME element. When `active` changes,
+                    the old tab's div unmounts and the new tab's div mounts, but
+                    framer-motion animates the transition as if the element slid across.
+                    This is only possible with layoutId — no CSS transition could do it
+                    across separate DOM elements. */}
                 {isActive && (
                   <motion.div
                     layoutId="tab-indicator"
